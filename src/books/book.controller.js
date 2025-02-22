@@ -175,6 +175,24 @@ const getSingleBook = async (req, res) => {
   }
 };
 
+const getAuthors = async (req, res) => {
+  try {
+    const authors = await BulkImport.distinct('authors');
+    res.status(200).json({ success: true, data: authors });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch authors', error: error.message });
+  }
+};
+
+const getPublishers = async (req, res) => {
+  try {
+    const publishers = await BulkImport.distinct('publisher');
+    res.status(200).json({ success: true, data: publishers });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch publishers', error: error.message });
+  }
+};
+
 module.exports = {
   postABook,
   getAllBooks,
@@ -182,5 +200,7 @@ module.exports = {
   UpdateBook,
   deleteABook,
   bulkImportFromFile,
-  getAllBulkBooks
+  getAllBulkBooks,
+  getAuthors,
+  getPublishers
 };

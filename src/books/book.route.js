@@ -7,7 +7,9 @@ const {
   UpdateBook,
   deleteABook,
   getAllBulkBooks,
-  bulkImportFromFile
+  bulkImportFromFile,
+  getAuthors,
+  getPublishers
 } = require("./book.controller");
 const verifyAdminToken = require("../middleware/verifyAdminToken");
 const router = express.Router();
@@ -26,6 +28,9 @@ router.get("/", getAllBooks);
 
 // get all bulk books
 router.get("/bulk", getAllBulkBooks);
+
+router.get('/authors', getAuthors);
+router.get('/publishers', getPublishers);
 
 // single book endpoint
 router.get("/:id", getSingleBook);
