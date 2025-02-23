@@ -177,8 +177,25 @@ const getSingleBook = async (req, res) => {
 
 const getAuthors = async (req, res) => {
   try {
-    const authors = await BulkImport.distinct('authors');
-    res.status(200).json({ success: true, data: authors });
+    const authorsWithBooks = await BulkImport.aggregate([
+      {
+        $group: {
+          _id: "$authors",
+          books: { $push: "$title" }, // Collect book titles
+          count: { $sum: 1 } // Count the number of books
+        }
+      },
+      {
+        $project: {
+          author: "$_id",
+          books: 1,
+          count: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+    res.status(200).json({ success: true, data: authorsWithBooks });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch authors', error: error.message });
   }
@@ -186,8 +203,25 @@ const getAuthors = async (req, res) => {
 
 const getPublishers = async (req, res) => {
   try {
-    const publishers = await BulkImport.distinct('publisher');
-    res.status(200).json({ success: true, data: publishers });
+    const publishersWithBooks = await BulkImport.aggregate([
+      {
+        $group: {
+          _id: "$publisher",
+          books: { $push: "$title" }, // Collect book titles
+          count: { $sum: 1 } // Count the number of books
+        }
+      },
+      {
+        $project: {
+          publisher: "$_id",
+          books: 1,
+          count: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+    res.status(200).json({ success: true, data: publishersWithBooks });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch publishers', error: error.message });
   }
