@@ -11,6 +11,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3039",
   "https://bookstore-one-gold.vercel.app",
+  "https://admin.booksweb.org",
 ];
 
 app.use(
