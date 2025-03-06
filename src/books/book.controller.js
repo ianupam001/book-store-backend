@@ -105,6 +105,9 @@ const bulkUpload = async (req, res) => {
 
 const bulkImportFromFile = async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
     const { path } = req.file; // Ensure the file is uploaded
     const workbook = xlsx.readFile(path);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
