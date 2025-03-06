@@ -12,7 +12,11 @@ const bannerSchema = new mongoose.Schema({
     },
     bannerUrl: {
         type: String,
-        required: true,
+        required: false,
+    },
+    link: {
+        type: String,
+        required: false,
     },
     isVerified: {
         type: Boolean,

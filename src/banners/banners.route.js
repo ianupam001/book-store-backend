@@ -5,6 +5,7 @@ const { upload } = require('../utils/s3Uploader');
 const router = express.Router();
 
 router.post('/upload', upload.single('banner'), (req, res, next) => { next() }, createBanner);
+router.post('/create', createBanner);
 router.get('/:page', getBannersByPage);
 router.patch('/edit/:id', upload.single('banner'), (req, res, next) => {
     console.log('Request Body:', req.body); // Should contain non-file fields

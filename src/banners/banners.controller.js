@@ -2,26 +2,34 @@ const Banner = require("./banners.model");
 
 const createBanner = async (req, res) => {
     try {
-        const { name, isVerified, status, page } = req.body;
-        const bannerUrl = `${process.env.DO_ENDPOINT}/${process.env.DO_BUCKET_NAME}/${req.file.key}`;
+        const { name, isVerified, status, page, link } = req.body;
+
+        // If a file is uploaded, use its URL, otherwise use the provided link
+        const bannerUrl = req.file
+            ? `${process.env.DO_ENDPOINT}/${process.env.DO_BUCKET_NAME}/${req.file.key}`
+            : link;
+
+        if (!bannerUrl) {
+            return res.status(400).json({ message: "Either upload a file or provide a banner link" });
+        }
 
         const newBanner = new Banner({
             name,
             bannerUrl,
+            link: link || '', // Save link if provided
             isVerified,
             status,
             page,
         });
 
         await newBanner.save();
-        res
-            .status(201)
-            .json({ message: "Banner created successfully", banner: newBanner });
+        res.status(201).json({ message: "Banner created successfully", banner: newBanner });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Failed to create banner" });
     }
 };
+
 
 const getBannersByPage = async (req, res) => {
     try {
