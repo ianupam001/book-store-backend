@@ -35,7 +35,7 @@ app.use(express.json());
 app.use(express.json({ limit: "50mb" })); // Increase to 50MB
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-// app.use(requestLogger);
+app.use(requestLogger);
 // routes
 const bookRoutes = require("./src/books/book.route");
 const orderRoutes = require("./src/orders/order.route");
