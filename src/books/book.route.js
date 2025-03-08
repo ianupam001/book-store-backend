@@ -1,5 +1,4 @@
 const express = require("express");
-const Book = require("./book.model");
 const {
   postABook,
   getAllBooks,
@@ -12,33 +11,206 @@ const {
   getPublishers
 } = require("./book.controller");
 const verifyAdminToken = require("../middleware/verifyAdminToken");
+const multer = require("multer");
+
+const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
-const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+/**
+ * @swagger
+ * tags:
+ *   name: Books
+ *   description: API for managing books
+ */
 
-// post a book
+/**
+ * @swagger
+ * /api/books/create-book:
+ *   post:
+ *     summary: Create a new book
+ *     tags: [Books]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "The Great Gatsby"
+ *               author:
+ *                 type: string
+ *                 example: "F. Scott Fitzgerald"
+ *               price:
+ *                 type: number
+ *                 example: 19.99
+ *     responses:
+ *       201:
+ *         description: Book created successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.post("/create-book", verifyAdminToken, postABook);
 
+/**
+ * @swagger
+ * /api/books/bulk-import:
+ *   post:
+ *     summary: Bulk import books from a file
+ *     tags: [Books]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Books imported successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.post("/bulk-import", upload.single("file"), verifyAdminToken, bulkImportFromFile);
 
-// get all books
+/**
+ * @swagger
+ * /api/books:
+ *   get:
+ *     summary: Get all books
+ *     tags: [Books]
+ *     responses:
+ *       200:
+ *         description: List of all books
+ */
 router.get("/", getAllBooks);
 
-
-// get all bulk books
+/**
+ * @swagger
+ * /api/books/bulk:
+ *   get:
+ *     summary: Get all bulk books
+ *     tags: [Books]
+ *     responses:
+ *       200:
+ *         description: List of bulk books
+ */
 router.get("/bulk", getAllBulkBooks);
 
-router.get('/authors', getAuthors);
-router.get('/publishers', getPublishers);
+/**
+ * @swagger
+ * /api/books/authors:
+ *   get:
+ *     summary: Get all authors
+ *     tags: [Books]
+ *     responses:
+ *       200:
+ *         description: List of authors
+ */
+router.get("/authors", getAuthors);
 
-// single book endpoint
+/**
+ * @swagger
+ * /api/books/publishers:
+ *   get:
+ *     summary: Get all publishers
+ *     tags: [Books]
+ *     responses:
+ *       200:
+ *         description: List of publishers
+ */
+router.get("/publishers", getPublishers);
+
+/**
+ * @swagger
+ * /api/books/{id}:
+ *   get:
+ *     summary: Get a single book by ID
+ *     tags: [Books]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "65d12345abcd67890ef12345"
+ *     responses:
+ *       200:
+ *         description: Book details
+ *       404:
+ *         description: Book not found
+ */
 router.get("/:id", getSingleBook);
 
-
-// update a book endpoint
+/**
+ * @swagger
+ * /api/books/edit/{id}:
+ *   put:
+ *     summary: Update a book
+ *     tags: [Books]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "65d12345abcd67890ef12345"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Updated Title"
+ *               price:
+ *                 type: number
+ *                 example: 25.99
+ *     responses:
+ *       200:
+ *         description: Book updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Book not found
+ */
 router.put("/edit/:id", verifyAdminToken, UpdateBook);
 
+/**
+ * @swagger
+ * /api/books/{id}:
+ *   delete:
+ *     summary: Delete a book by ID
+ *     tags: [Books]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "65d12345abcd67890ef12345"
+ *     responses:
+ *       200:
+ *         description: Book deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Book not found
+ */
 router.delete("/:id", verifyAdminToken, deleteABook);
 
 module.exports = router;

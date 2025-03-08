@@ -40,8 +40,9 @@ app.use(requestLogger);
 const bookRoutes = require("./src/books/book.route");
 const orderRoutes = require("./src/orders/order.route");
 const userRoutes = require("./src/users/user.route");
-const adminRoutes = require("./src/stats/admin.stats");
+const adminRoutes = require("./src/stats/admin.route");
 const bannerRoutes = require("./src/banners/banners.route");
+const setupSwagger = require("./swagger");
 
 
 app.use("/api/books", bookRoutes);
@@ -49,6 +50,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/auth", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/banners", bannerRoutes)
+
+setupSwagger(app);
 
 async function main() {
   await mongoose.connect(process.env.DB_URL);

@@ -1,41 +1,68 @@
-const express =  require('express');
-const User = require('./user.model');
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const { adminLogin } = require("./user.controller");
 
-const router =  express.Router();
+const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET_KEY
+/**
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: Admin authentication API
+ */
 
-router.post("/admin", async (req, res) => {
-    const {username, password} = req.body;
-    try {
-        const admin =  await User.findOne({username});
-        if(!admin) {
-            res.status(404).send({message: "Admin not found!"})
-        }
-        if(admin.password !== password) {
-            res.status(401).send({message: "Invalid password!"})
-        }
-        
-        const token =  jwt.sign(
-            {id: admin._id, username: admin.username, role: admin.role}, 
-            JWT_SECRET,
-            {expiresIn: "1h"}
-        )
-
-        return res.status(200).json({
-            message: "Authentication successful",
-            token: token,
-            user: {
-                username: admin.username,
-                role: admin.role
-            }
-        })
-        
-    } catch (error) {
-       console.error("Failed to login as admin", error)
-       res.status(401).send({message: "Failed to login as admin"}) 
-    }
-})
+/**
+ * @swagger
+ * /api/auth/admin:
+ *   post:
+ *     summary: Admin login
+ *     tags: [Authentication]
+ *     description: Authenticate an admin and return a JWT token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: "adminUser"
+ *               password:
+ *                 type: string
+ *                 example: "securepassword"
+ *     responses:
+ *       200:
+ *         description: Authentication successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Authentication successful"
+ *                 token:
+ *                   type: string
+ *                   example: "jwt_token_here"
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     username:
+ *                       type: string
+ *                       example: "adminUser"
+ *                     role:
+ *                       type: string
+ *                       example: "admin"
+ *       401:
+ *         description: Invalid credentials
+ *       404:
+ *         description: Admin not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/admin", adminLogin);
 
 module.exports = router;
