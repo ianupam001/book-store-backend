@@ -8,7 +8,8 @@ const {
   getAllBulkBooks,
   bulkImportFromFile,
   getAuthors,
-  getPublishers
+  getPublishers,
+  newReleases
 } = require("./book.controller");
 const verifyAdminToken = require("../middleware/verifyAdminToken");
 const multer = require("multer");
@@ -53,7 +54,7 @@ const router = express.Router();
  *       401:
  *         description: Unauthorized
  */
-router.post("/create-book", verifyAdminToken, postABook);
+router.post("/create-book", postABook);
 
 /**
  * @swagger
@@ -128,6 +129,37 @@ router.get("/authors", getAuthors);
  *         description: List of publishers
  */
 router.get("/publishers", getPublishers);
+
+/**
+ * @swagger
+ * /api/books/new-releases:
+ *   get:
+ *     summary: Get all books sorted by release date
+ *     description: Fetch all active books sorted by latest release date.
+ *     tags:
+ *       - Books
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all books.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   title:
+ *                     type: string
+ *                   releaseDate:
+ *                     type: string
+ *                     format: date
+ *                   status:
+ *                     type: string
+ *                     enum: [Active, Inactive]
+ *       500:
+ *         description: Server error.
+ */
+router.get('/new-releases', newReleases);
 
 /**
  * @swagger

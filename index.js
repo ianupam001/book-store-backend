@@ -42,6 +42,7 @@ const orderRoutes = require("./src/orders/order.route");
 const userRoutes = require("./src/users/user.route");
 const adminRoutes = require("./src/stats/admin.route");
 const bannerRoutes = require("./src/banners/banners.route");
+const uploadRoutes = require("./src/uploadFile/uploader.route")
 const setupSwagger = require("./swagger");
 
 
@@ -50,6 +51,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/auth", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/banners", bannerRoutes)
+app.use('/api', uploadRoutes);
 
 setupSwagger(app);
 

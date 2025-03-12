@@ -5,7 +5,7 @@ const path = require("path");
 const xlsx = require("xlsx");
 const postABook = async (req, res) => {
   try {
-    const newBook = await Book({ ...req.body });
+    const newBook = await BulkImport({ ...req.body });
     await newBook.save();
     res
       .status(200)
@@ -32,7 +32,7 @@ const getAllBooks = async (req, res) => {
 const UpdateBook = async (req, res) => {
   try {
     const { id } = req.params;
-    const updatedBook = await Book.findByIdAndUpdate(id, req.body, {
+    const updatedBook = await BulkImport.findByIdAndUpdate(id, req.body, {
       new: true,
     });
     if (!updatedBook) {
@@ -51,7 +51,7 @@ const UpdateBook = async (req, res) => {
 const deleteABook = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedBook = await Book.findByIdAndDelete(id);
+    const deletedBook = await BulkImport.findByIdAndDelete(id);
     if (!deletedBook) {
       res.status(404).send({ message: "Book is not Found!" });
     }
@@ -64,44 +64,6 @@ const deleteABook = async (req, res) => {
     res.status(500).send({ message: "Failed to delete a book" });
   }
 };
-
-const bulkUpload = async (req, res) => {
-  try {
-    const { books } = req.body;
-
-    console.log("Payload size:", JSON.stringify(books).length); // Log payload size
-
-    if (!Array.isArray(books) || books.length === 0) {
-      return res.status(400).json({ message: "Invalid books data" });
-    }
-
-    // Validate each book
-    for (const book of books) {
-      if (!book.ISBN || !book.Title || !book.Author) {
-        return res.status(400).json({ message: "Missing required fields" });
-      }
-    }
-
-    const chunkSize = 100; // Number of books per chunk
-    const insertedBooks = [];
-
-    for (let i = 0; i < books.length; i += chunkSize) {
-      const chunk = books.slice(i, i + chunkSize);
-      const result = await Bulkbook.insertMany(chunk);
-      insertedBooks.push(...result);
-    }
-
-    res.status(201).json({
-      message: "Books imported successfully",
-      data: insertedBooks,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to import books" });
-  }
-};
-
-
 
 const bulkImportFromFile = async (req, res) => {
   try {
@@ -230,6 +192,22 @@ const getPublishers = async (req, res) => {
   }
 };
 
+const newReleases = async () => {
+  try {
+    const newReleases = await BulkImport.find(
+      { status: 'Active' }, // Fetch only active books
+      { imageLinks: 1, ISBN: 1, _id: 0 } // Projection: Only return imageLinks & ISBN
+    ).sort({ releaseDate: -1 }); // Sort by latest releaseDate
+
+    return newReleases;
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    throw new Error('Failed to fetch books');
+  }
+};
+
+
+
 module.exports = {
   postABook,
   getAllBooks,
@@ -239,5 +217,6 @@ module.exports = {
   bulkImportFromFile,
   getAllBulkBooks,
   getAuthors,
-  getPublishers
+  getPublishers,
+  newReleases
 };
