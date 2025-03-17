@@ -98,13 +98,75 @@ router.get("/", getAllBooks);
  * @swagger
  * /api/books/bulk:
  *   get:
- *     summary: Get all bulk books
+ *     summary: Get all bulk books with pagination and search
  *     tags: [Books]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number (default is 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 60
+ *         description: Number of books per page (default is 60)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for filtering by title, authors, ISBN, or categories
  *     responses:
  *       200:
- *         description: List of bulk books
+ *         description: List of bulk books with pagination
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 books:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         description: Unique identifier of the book
+ *                       title:
+ *                         type: string
+ *                         description: Book title
+ *                       authors:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         description: List of authors
+ *                       ISBN:
+ *                         type: string
+ *                         description: ISBN of the book
+ *                       categories:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         description: Book categories
+ *                       price:
+ *                         type: number
+ *                         description: Price of the book
+ *                 totalBooks:
+ *                   type: integer
+ *                   description: Total number of books matching the query
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Total number of pages available
+ *                 currentPage:
+ *                   type: integer
+ *                   description: Current page number
+ *       500:
+ *         description: Failed to fetch books
  */
 router.get("/bulk", getAllBulkBooks);
+
 
 /**
  * @swagger

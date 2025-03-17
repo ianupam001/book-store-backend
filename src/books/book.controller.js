@@ -114,17 +114,59 @@ const bulkImportFromFile = async (req, res) => {
 };
 
 
-
-
 const getAllBulkBooks = async (req, res) => {
   try {
-    const books = await BulkImport.find().sort({ createdAt: -1 });
-    res.status(200).send(books);
+    // Extract query parameters
+    const { page = 1, limit = 60, search = '' } = req.query;
+
+    // Convert page and limit to numbers
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    // Calculate the number of documents to skip
+    const skip = (pageNumber - 1) * limitNumber;
+
+
+    // Define the search filter
+    const searchFilter = search
+      ? {
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { authors: { $regex: search, $options: 'i' } },
+          { categories: { $regex: search, $options: 'i' } },
+          { publisher: { $regex: search, $options: 'i' } },
+          { ISBN: { $regex: search, $options: 'i' } },
+        ],
+      }
+      : {};
+
+    // Fetch books with pagination and search filter
+    const books = await BulkImport.find(searchFilter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNumber);
+
+    // Log the number of books fetched for debugging
+    const fetchedBooks = books.length
+
+    // Get the total count of books matching the filter
+    const totalBooks = await BulkImport.countDocuments(searchFilter);
+
+    // Send the response with pagination metadata
+    res.status(200).send({
+      books,
+      fetchedBooks,
+      totalBooks,
+      totalPages: Math.ceil(totalBooks / limitNumber),
+      currentPage: pageNumber,
+    });
   } catch (error) {
-    console.error("Error fetching books", error);
-    res.status(500).send({ message: "Failed to fetch books" });
+    console.error('Error fetching books', error);
+    res.status(500).send({ message: 'Failed to fetch books' });
   }
 };
+
+
 
 const getSingleBook = async (req, res) => {
   try {
